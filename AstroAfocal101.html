@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>astroAfocal 10.0 - Project Description Added</title>
+    <style>
+        :root {--bg: #080000;--panel: #120000;--text: #ff3333;--accent: #ff0000;--highlight: #00ff44;--info: #00ccff;--warn: #ff9900;}
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+        .container { background-color: var(--panel); padding: 25px; border-radius: 15px; box-shadow: 0 0 40px rgba(255, 0, 0, 0.5); width: 100%; max-width: 600px; border: 1px solid #440000; }
+        h1 { text-align: center; font-size: 2rem; margin: 0 0 20px 0; color: var(--accent); text-transform: uppercase; letter-spacing: 4px; text-shadow: 0 0 15px var(--accent); }
+        .section-title { font-size: 0.9rem; color: #ff9999; margin: 20px 0 10px 0; text-transform: uppercase; border-bottom: 2px solid #660000; padding-bottom: 5px; font-weight: bold; letter-spacing: 1px; }
+        .radio-group { margin-bottom: 15px; text-align: center; }
+        .radio-group label { display: inline-block; margin: 0 15px; font-size: 0.85rem; color: #ff8888; cursor: pointer; }
+        .radio-group input[type="radio"] { margin-right: 5px; accent-color: #ff0000; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; font-size: 0.8rem; margin-bottom: 5px; color: #cc0000; font-weight: 600; }
+        input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #440000; background-color: #000; color: #fff; font-size: 1rem; box-sizing: border-box; }
+        .results { margin-top: 25px; padding: 20px; background-color: #050000; border-radius: 12px; border: 1px solid #aa0000; }
+        .result-item { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 1.1rem; border-bottom: 1px solid #330000; padding-bottom: 5px; }
+        .result-label { color: #cc0000; font-size: 0.95rem; }
+        .result-value { font-weight: bold; color: #ffffff; font-family: 'Consolas', monospace; }
+        .fov-box { background: linear-gradient(180deg, #440000 0%, #1a0000 100%); color: #fff; padding: 20px; border-radius: 10px; text-align: center; margin-top: 20px; border: 1px solid var(--accent); }
+        .vignette-info { font-size: 0.9rem; text-align: center; margin-top: 15px; padding: 10px; border-radius: 6px; font-weight: bold; line-height: 1.5; border: 1px solid transparent; }
+        
+        .formula-section { margin-top: 30px; width: 100%; max-width: 600px; background: #0a0a0a; padding: 25px; border-radius: 12px; border: 1px solid #222; color: #bbb; font-size: 0.85rem; }
+        .formula-section h2 { color: #888; font-size: 1.1rem; text-transform: uppercase; margin-top: 0; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
+        .formula-list { list-style: none; padding: 0; }
+        .formula-list li { margin-bottom: 25px; border-bottom: 1px solid #1a1a1a; padding-bottom: 15px; }
+        .formula-code { color: #ffcc00; font-family: 'Consolas', monospace; font-weight: bold; display: block; margin-bottom: 6px; font-size: 1rem; }
+        .formula-desc { line-height: 1.6; color: #999; }
+        .formula-desc b { color: #ddd; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>astroAfocal 10.0</h1>
+    
+    <div class="radio-group">
+        <label>
+            <input type="radio" name="opticsType" value="telescope" checked onchange="toggleOptics()"> Telescopio
+        </label>
+        <label>
+            <input type="radio" name="opticsType" value="binocular" onchange="toggleOptics()"> Binocolo
+        </label>
+    </div>
+
+    <div id="telescopeSection" class="grid">
+        <div class="section-title">OTTICA TELESCOPIO</div>
+        <div class="input-group">
+            <label>Focale Tel (mm)</label>
+            <input type="number" id="fTel" value="1000" oninput="calculate()">
+        </div>
+        <div class="input-group">
+            <label>Diametro (mm)</label>
+            <input type="number" id="diam" value="200" oninput="calculate()">
+        </div>
+        <div class="input-group">
+            <label>Focale Oculare (mm)</label>
+            <input type="number" id="fOc" value="25" oninput="calculate()">
+        </div>
+        <div class="input-group">
+            <label>AFOV Oculare (°)</label>
+            <input type="number" id="afov" value="52" oninput="calculate()">
+        </div>
+    </div>
+    
+    <div id="binocularSection" class="grid" style="display: none;">
+        <div class="section-title">BINOCCOLO</div>
+        <div class="input-group">
+            <label>Diametro Obiettivo (mm)</label>
+            <input type="number" id="diamBin" value="42" oninput="calculate()">
+        </div>
+        <div class="input-group">
+            <label>Ingrandimento</label>
+            <input type="number" id="ingrBin" value="10" oninput="calculate()">
+        </div>
+    </div>
+    
+    <div class="section-title">OTTICA SMARTPHONE</div>
+    <div id="smartphoneSection">
+        <div class="input-group">
+            <label>Formato Sensore (Smartphone Database)</label>
+            <select id="sensorType" onchange="updateCropDisplay()">
+                <optgroup label="Ultra/Premium (Sensori Grandi)">
+                    <option value="2.72">1.0" Type (Xiaomi Ultra, IMX989, LYT-900) [2.72x]</option>
+                    <option value="3.20">1/1.12" Type (Xiaomi 11 Ultra, Samsung GN2) [3.2x]</option>
+                    <option value="3.40">1/1.2" Type (Samsung ISOCELL GN1) [3.4x]</option>
+                    <option value="3.50">1/1.28" Type (iPhone Pro, Huawei P60 Pro) [3.5x]</option>
+                </optgroup>
+                <optgroup label="Flagship Main (Sensori Grandi)">
+                    <option value="3.60">1/1.31" Type (Pixel 8/9 Pro, Xiaomi 14) [3.6x]</option>
+                    <option value="3.70">1/1.33" Type (Galaxy S23/S24 Ultra, Samsung HP2) [3.7x]</option>
+                    <option value="3.90">1/1.4" Type (Vivo X100 Pro tele, HP9) [3.9x]</option>
+                    <option value="4.00">1/1.43" Type (OnePlus 12, Sony LYT-808) [4.0x]</option>
+                    <option value="4.20">1/1.5" Type (Pixel 7, Galaxy S22) [4.2x]</option>
+                </optgroup>
+                <optgroup label="Mainstream & High-Mid">
+                    <option value="4.35">1/1.56" Type (Sony IMX890, IMX766) [4.35x]</option>
+                    <option value="4.50" selected>1/1.7" Type (Standard High-main) [4.5x]</option>
+                    <option value="5.00">1/1.8" Type (Xiaomi standard) [5.0x]</option>
+                    <option value="5.30">1/1.9" Type (Samsung ISOCELL HM6) [5.3x]</option>
+                    <option value="5.60">1/2" Type (Omnivision OV64B) [5.6x]</option>
+                </optgroup>
+                <optgroup label="Standard & Secondary (Zoom/Wide)">
+                    <option value="5.62">1/2.3" Type (GoPro, Droni, Standard) [5.62x]</option>
+                    <option value="6.10">1/2.51" Type (iPhone 11 Main, Ultra-wide) [6.1x]</option>
+                    <option value="6.80">1/2.8" Type (Lenti Tele standard) [6.8x]</option>
+                    <option value="8.20">1/3.4" Type (Zoom Periscopici) [8.2x]</option>
+                    <option value="9.50">1/3.5" Type (Zoom S23/S24 Ultra) [9.5x]</option>
+                    <option value="11.20">1/4.0" Type (Zoom 10x spinti) [11.2x]</option>
+                    <option value="14.00">1/5" Type (Sensori piccoli/economici) [14.0x]</option>
+                </optgroup>
+                <option value="custom">Custom Crop Factor...</option>
+            </select>
+        </div>
+
+        <div id="customCropDiv" style="display:none;" class="input-group">
+            <label>Crop Factor Manuale</label>
+            <input type="number" id="customCrop" value="4.5" step="0.01" oninput="calculate()">
+        </div>
+
+        <div class="grid">
+            <div class="input-group">
+                <label>Focale Camera (mm)</label>
+                <input type="number" id="fCam" value="5.43" step="0.01" oninput="calculate()">
+            </div>
+            <div class="input-group">
+                <label>Diaframma (f/)</label>
+                <input type="number" id="fStopCam" value="1.89" step="0.01" oninput="calculate()">
+            </div>
+            <div class="input-group">
+                <label>Dim. Pixel (µm)</label>
+                <input type="number" id="pxSize" value="1.6" step="0.1" oninput="calculate()">
+            </div>
+        </div>
+    </div>
+
+    <div class="results">
+        <div class="result-item"><span class="result-label">Perdita Luce Sistema:</span><span class="result-value" id="resLoss" style="color:var(--warn)">-</span></div>
+        <div class="result-item"><span class="result-label">Pupilla Uscita Tel:</span><span class="result-value" id="resPU" style="color:var(--info)">-</span></div>
+        <div class="result-item"><span class="result-label">Pupilla Ingresso Cam:</span><span class="result-value" id="resPI" style="color:var(--info)">-</span></div>
+        <div class="result-item"><span class="result-label">Campionamento (Scale):</span><span class="result-value" id="resSampling" style="color:var(--info)">-</span></div>
+        <div class="result-item"><span class="result-label">Oculare Limite (PU=PI):</span><span class="result-value" id="resOcLimit" style="color:var(--info)">-</span></div>
+        <div class="result-item"><span class="result-label">Apertura Coincidenza:</span><span class="result-value" id="resDiamLimit" style="color:var(--warn)">-</span></div>
+        <div class="result-item"><span class="result-label">f/ di Coincidenza:</span><span class="result-value" id="resFtotalLimit" style="color:#ff55ff">-</span></div>
+        
+        <div class="result-item" style="border-top: 1px dashed #440000; padding-top: 8px; margin-top:10px;"><span class="result-label">Ingrandimento Ottico:</span><span class="result-value" id="resIngr">-</span></div>
+        <div class="result-item"><span class="result-label">Focale Reale Sist:</span><span class="result-value" id="resFeq">-</span></div>
+        <div class="result-item"><span class="result-label">Focale Eq. 35mm:</span><span class="result-value" id="resFeq35" style="color:var(--highlight)">-</span></div>
+        <div class="result-item"><span class="result-label">Rapporto Focale (f/):</span><span class="result-value" id="resFtotal" style="color:var(--highlight)">-</span></div>
+        
+        <div class="fov-box">CAMPO REALE (FOV)<br><span id="resFOV" style="font-size: 1.8rem; font-weight: 800; color: var(--highlight);">-</span></div>
+        <div id="vignetteStatus" class="vignette-info"></div>
+    </div>
+</div>
+
+<div class="formula-section">
+    <h2>Didascalia Formule e Guida all'Uso</h2>
+    <ul class="formula-list">
+        <li>
+            <span class="formula-code">M = F_tel / F_oc  |  F_eq (Reale) = M × F_cam</span>
+            <span class="formula-desc"><b>Ingrandimento e Focale:</b> Il telescopio agisce come un tele-obiettivo. L'immagine formata all'oculare viene ingrandita <b>M</b> volte. La camera dello smartphone vede questa immagine e la ri-proietta sul sensore, portando la focale nativa del telefono a una focale risultante <b>F_eq</b>.</span>
+        </li>
+        <li>
+            <span class="formula-code">F_35mm = F_eq × CropFactor</span>
+            <span class="formula-desc"><b>Focale Equivalente Full-Frame:</b> Serve a visualizzare lo "zoom" totale percepito rapportato al formato fotografico standard 35mm.</span>
+        </li>
+        <li>
+            <span class="formula-code">Scale ("/px) = (Px_µm / F_eq) × 206.265</span>
+            <span class="formula-desc"><b>Campionamento (Risoluzione):</b> Indica quanti secondi d'arco (") di cielo cadono su un singolo pixel. Valori ideali per l'alta risoluzione sono tra 0.5" e 1.0".</span>
+        </li>
+        <li>
+            <span class="formula-code">PU = D_tel / M  |  PI = F_cam / f-stop</span>
+            <span class="formula-desc"><b>Pupilla Uscita (PU) e Ingresso (PI):</b> La PU è il fascio luminoso dell'oculare. La PI è l'apertura fisica della camera dello smartphone. Se PU > PI, parte della luce raccolta viene persa.</span>
+        </li>
+        <li>
+            <span class="formula-code">f/ Coincidenza = F_eq / D_lim</span>
+            <span class="formula-desc"><b>Muro della Luminosità:</b> Rapporto focale massimo ottenibile. Se il telescopio è più grande di D_lim, la luminosità resta bloccata a questo valore per via del limite della PI dello smartphone.</span>
+        </li>
+        <li>
+            <span class="formula-code">F_oc_lim = PI × (F_tel / D)  |  D_lim = PI × M</span>
+            <span class="formula-desc"><b>Parametri di Equilibrio:</b> Calcolano l'oculare minimo o il diametro massimo del telescopio per far coincidere PU e PI senza sprechi di luce.</span>
+        </li>
+        <li>
+            <span class="formula-code">FOV = min(AFOV_oc, FOV_cam) / M</span>
+            <span class="formula-desc"><b>Campo Reale (FOV):</b> L'ampiezza angolare di cielo inquadrata.</span>
+        </li>
+    </ul>
+</div>
+
+<!-- SEZIONE AGGIUNTA: DESCRIZIONE PROGETTO -->
+<div class="formula-section">
+    <h2>Descrizione Progetto</h2>
+    <p>
+        Questo strumento, <strong>astroAfocal</strong>, è stato progettato per assistere gli astrofili nell'accoppiamento di smartphone o fotocamere compatte con telescopi o binocoli, utilizzando la tecnica della <strong>fotografia afocale</strong>.
+    </p>
+    <p>
+        Inserendo i parametri del tuo strumento ottico (telescopio o binocolo) e della fotocamera del tuo smartphone, potrai ottenere rapidamente:
+    </p>
+    <ul>
+        <li>L'ingrandimento effettivo e la focale risultante.</li>
+        <li>Il campo inquadrato (FOV), fondamentale per capire cosa rientra nell'immagine.</li>
+        <li>Informazioni sulla pupilla d'uscita e sul potenziale spreco di luce.</li>
+        <li>Il campionamento dell'immagine, per valutare la compatibilità con il seeing atmosferico.</li>
+        <li>E molto altro, per ottimizzare le tue riprese del cielo.</li>
+    </ul>
+    <p>
+        Spero ti sia utile nelle tue osservazioni!
+    </p>
+</div>
+
+<script>
+    function toggleOptics() {
+        const telescopeSection = document.getElementById('telescopeSection');
+        const binocularSection = document.getElementById('binocularSection');
+        const telescopeRadio = document.querySelector('input[name="opticsType"][value="telescope"]');
+        
+        if (telescopeRadio.checked) {
+            telescopeSection.style.display = 'block';
+            binocularSection.style.display = 'none';
+        } else { // Binocolo è selezionato
+            telescopeSection.style.display = 'none';
+            binocularSection.style.display = 'block';
+        }
+        updateCropDisplay(); 
+        calculate(); 
+    }
+
+    function updateCropDisplay() {
+        const sel = document.getElementById('sensorType').value;
+        document.getElementById('customCropDiv').style.display = (sel === 'custom') ? 'block' : 'none';
+        calculate();
+    }
+
+    function calculate() {
+        const fTel = parseFloat(document.getElementById('fTel').value);
+        const diam = parseFloat(document.getElementById('diam').value);
+        const fOc = parseFloat(document.getElementById('fOc').value);
+        const afov = parseFloat(document.getElementById('afov').value);
+        const fCam = parseFloat(document.getElementById('fCam').value);
+        const fStopCam = parseFloat(document.getElementById('fStopCam').value);
+        const pxSize = parseFloat(document.getElementById('pxSize').value);
+        let cropFactor = (document.getElementById('sensorType').value === 'custom') ? parseFloat(document.getElementById('customCrop').value) : parseFloat(document.getElementById('sensorType').value);
+
+        const diamBin = parseFloat(document.getElementById('diamBin').value);
+        const ingrBin = parseFloat(document.getElementById('ingrBin').value);
+
+        let currentFoc, currentDiam, currentIngr, currentAFOV, currentPU;
+
+        const telescopeRadio = document.querySelector('input[name="opticsType"][value="telescope"]');
+        if (telescopeRadio.checked) {
+            currentFoc = fTel;
+            currentDiam = diam;
+            currentIngr = fTel / fOc;
+            currentAFOV = afov;
+            currentPU = diam / currentIngr; // PU del telescopio
+        } else { // Binocolo è selezionato
+            currentFoc = fCam * ingrBin; // Simula una focale equivalente per coerenza con l'ingrandimento del binocolo
+            currentDiam = diamBin;
+            currentIngr = ingrBin;
+            currentAFOV = getBinocularFOV(diamBin, ingrBin); 
+            currentPU = diamBin / ingrBin; // PU del binocolo
+        }
+
+        if (fTel > 0 && fOc > 0 && fCam > 0 && diam > 0 && cropFactor > 0 && currentFoc > 0 && currentDiam > 0 && currentIngr > 0 && currentAFOV > 0) {
+            const ingr_tel_oc = fTel / fOc; // Ingrandimento specifico telescopio/oculare
+
+            const feqAfocal = currentIngr * fCam; 
+            const feq35mm = feqAfocal * cropFactor;
+            const fTotal = feqAfocal / currentDiam; 
+            
+            const piCam = fCam / fStopCam;
+            const fOcLimit = piCam * (currentFoc / currentDiam); 
+            const diamLimit = piCam * currentIngr;
+            const fTotalLimit = feqAfocal / diamLimit;
+
+            const sampling = (pxSize / feqAfocal) * 206.265;
+
+            let lossPercent = 0;
+            if (currentPU > piCam) {
+                lossPercent = (1 - (Math.pow(piCam, 2) / Math.pow(currentPU, 2))) * 100;
+            }
+
+            const sensorDiag = 43.27 / cropFactor;
+            const camFOV = 2 * Math.atan(sensorDiag / (2 * fCam)) * (180 / Math.PI);
+            const realFOV = Math.min(camFOV, currentAFOV) / currentIngr;
+
+            document.getElementById('resLoss').innerText = lossPercent.toFixed(0) + " %";
+            document.getElementById('resPU').innerText = currentPU.toFixed(2) + " mm"; // Mostra la PU dell'ottica attiva
+            document.getElementById('resPI').innerText = piCam.toFixed(2) + " mm";
+            document.getElementById('resSampling').innerText = sampling.toFixed(2) + " \"/px";
+            document.getElementById('resOcLimit').innerText = fOcLimit.toFixed(1) + " mm";
+            document.getElementById('resDiamLimit').innerText = diamLimit.toFixed(1) + " mm";
+            document.getElementById('resFtotalLimit').innerText = "f/" + fTotalLimit.toFixed(2);
+            document.getElementById('resIngr').innerText = currentIngr.toFixed(1) + "x";
+            document.getElementById('resFeq').innerText = Math.round(feqAfocal) + " mm";
+            document.getElementById('resFeq35').innerText = Math.round(feq35mm) + " mm";
+            document.getElementById('resFtotal').innerText = "f/" + fTotal.toFixed(2);
+            document.getElementById('resFOV').innerText = Math.floor(realFOV) + "° " + Math.round((realFOV - Math.floor(realFOV)) * 60) + "'";
+
+            const vStat = document.getElementById('vignetteStatus');
+            vStat.innerHTML = (camFOV > currentAFOV ? "🟡 VIGNETTATURA CIRCOLARE" : "🟢 PIENO CAMPO") + (currentPU > piCam ? "🔴 ATTENZIONE: Perdita luce PU > PI" : "🟢 Nessuna perdita di Luce");
+            vStat.style.borderColor = (currentPU > piCam || camFOV > currentAFOV) ? "var(--warn)" : "var(--highlight)";
+            vStat.style.color = (currentPU > piCam || camFOV > currentAFOV) ? "var(--warn)" : "var(--highlight)";
+        }
+    }
+    
+    function getBinocularFOV(diam, ingr) {
+        const typicalBinocularAFOV = 60; 
+        return typicalBinocularAFOV;
+    }
+
+    function updateCropDisplay() {
+        const sel = document.getElementById('sensorType').value;
+        document.getElementById('customCropDiv').style.display = (sel === 'custom') ? 'block' : 'none';
+        calculate();
+    }
+
+    document.addEventListener('DOMContentLoaded', (event) => {
+        toggleOptics(); 
+        updateCropDisplay(); 
+    });
+
+    calculate();
+</script>
+</body>
+</html>
